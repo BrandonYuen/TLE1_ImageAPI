@@ -48,6 +48,6 @@ Temporary Items
 
 node_modules
 images/*
-!images/obama
+!images/obama.jpg
 npm-debug.log
 .node_history
