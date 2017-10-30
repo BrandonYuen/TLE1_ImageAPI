@@ -67,15 +67,24 @@ function checkImage (path) {
 
 function sendToCentralServer(data) {
 	console.log("Sending IBM response to central server.");
+	console.log("Data: ",data);
 
-	var centralReq = request.post('http://lampies.imanidap.nl',
-	function (response) {
-		console.log("response:",response)
-	});
+    // Send request to central server with IBM Result Data
+    request({
+        url: "http://lampies.imanidap.nl",
+    	method: "POST",
+    	json: {"IBMResult": data}
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            console.log(body)
+        }
+        else {
 
-	//Append multipart form data to request
-	var form2 = centralReq.form();
-	form2.append('IBMResponse', data);
+            console.log("error: " + error)
+            console.log("response.statusCode: " + response.statusCode)
+            console.log("response.statusText: " + response.statusText)
+        }
+    })
 }
 
 //Start server
