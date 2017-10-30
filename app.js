@@ -67,13 +67,15 @@ function checkImage (path) {
 
 function sendToCentralServer(data) {
 	console.log("Sending IBM response to central server.");
+
+	data = {"IBMResult": data};
 	console.log("Data: ",data);
 
     // Send request to central server with IBM Result Data
     request({
         url: "http://lampies.imanidap.nl",
     	method: "POST",
-    	json: {"IBMResult": data}
+    	json: data
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
             console.log(body)
