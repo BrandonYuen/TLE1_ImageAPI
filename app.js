@@ -43,7 +43,13 @@ function checkImage (path) {
 	//Send image to IBM
 	console.log("Sending request to IBM...")
 
-	var ibmReq = request.post('https://gateway-a.watsonplatform.net/visual-recognition/api/v3/detect_faces?api_key='+apiKey+'&version=2016-05-20',
+	var ibmReq = request.post({
+		url: 'https://gateway-a.watsonplatform.net/visual-recognition/api/v3/detect_faces?api_key='+apiKey+'&version=2016-05-20',
+		headers: {
+			"Content-Type": "application/json"
+		},
+		json:true
+	},
 	function (err, response, body) {
 		if (err) {
 			console.log("Error on IBM request: ", err);
