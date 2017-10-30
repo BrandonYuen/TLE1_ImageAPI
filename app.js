@@ -29,11 +29,16 @@ var Storage = multer.diskStorage({
 
 var upload = multer({ storage: Storage });
 
+// Watch for file changes in the images folder
+fs.watch('./images', {}, (eventType, filename) => {
+	if (filename) {
+		console.log("file update (",eventType, ") for:",filename);
+		checkImage("./images/"+filename);
+	}
+});
+
 // API Version 1
-app.post('/api/Upload', upload.single('imgUpload'), function (req, res, next) {
-	console.log("Uploaded image to storage!");
-	console.log("req.file: ",req.file);
-	console.log("req.file.path: ",req.file.path);
+function checkImage (path) {
 
 	//Send image to IBM
 	console.log("Sending request to IBM...")
@@ -42,17 +47,36 @@ app.post('/api/Upload', upload.single('imgUpload'), function (req, res, next) {
 	function (err, response, body) {
 		if (err) {
 			console.log("Error on IBM request: ", err);
-			return res.end("Something went wrong...");
+			//TODO: Send error to central server.
 		}
+
 		console.log("Successfull response from IBM with body",body);
-   		res.type('application/json');
-		return res.send(body);
+
+		if (body == undefined) {
+			console.log("Body is undefined, not sending to central server.")
+		} else {
+			//Send data to central server
+			sendToCentralServer(body);
+		}
 	});
 
 	//Append multipart form data to request
 	var form = ibmReq.form();
-	form.append('images_file', fs.createReadStream(req.file.path));
-});
+	form.append('images_file', fs.createReadStream(path));
+};
+
+function sendToCentralServer(data) {
+	console.log("Sending IBM response to central server.");
+
+	var centralReq = request.post('http://lampies.imanidap.nl',
+	function (response) {
+		console.log("response:",response)
+	});
+
+	//Append multipart form data to request
+	var form2 = centralReq.form();
+	form2.append('IBMResponse', data);
+}
 
 //Start server
 app.listen(1337, function () {
